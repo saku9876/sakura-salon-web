@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sakura Saloon | Luxury Hair & Beauty</title>
+  
+  <!-- Stylesheets -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sakura: {
+              50: '#fdf2f8',
+              100: '#fce7f3',
+              200: '#fbcfe8',
+              300: '#f9a8d4',
+              400: '#f472b6',
+              500: '#ec4899',
+              600: '#db2777',
+              700: '#be185d',
+              800: '#9d174d',
+              900: '#831843',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Playfair Display', 'serif'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'shimmer': 'shimmer 2s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.3.0/luxon.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+    
+    * {
+      scroll-behavior: smooth;
+    }
+    
+    .bg-gradient-shimmer {
+      background: linear-gradient(90deg, #fce7f3 25%, #fbcfe8 50%, #fce7f3 75%);
+      background-size: 200% 100%;
+      animation: shimmer 3s linear infinite;
+    }
+    
+    .sakura-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .card-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px -5px rgba(219, 39, 119, 0.2);
+    }
+    
+    .text-balance {
+      text-wrap: balance;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-b from-sakura-50 to-white font-sans text-gray-800 overflow-x-hidden">
+  <!-- Three.js Background -->
+  <div id="three-bg" class="fixed w-full h-full top-0 left-0 -z-10"></div>
+  
+  <!-- Header -->
+  <header id="header" class="sticky top-0 z-50 transition-all duration-300">
+    <div class="glass-effect px-6 py-4 shadow-sm">
+      <div class="container mx-auto flex flex-wrap items-center justify-between">
+        <div class="flex items-center">
+          <!-- Logo placeholder -->
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-sakura-400 to-sakura-600 flex items-center justify-center text-white font-bold text-xl mr-3">S</div>
+          <div>
+            <h1 class="text-2xl font-display font-bold text-sakura-800">Sakura Saloon</h1>
+            <p class="text-sm text-sakura-600 hidden sm:block">Elegance in Every Strand</p>
+          </div>
+        </div>
+        
+        <!-- Mobile menu button -->
+        <button id="menu-toggle" class="md:hidden bg-sakura-100 text-sakura-800 p-2 rounded-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex space-x-1">
+          <a href="#home" class="px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Home</a>
+          <a href="#services" class="px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Services</a>
+          <a href="#specialists" class="px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Our Team</a>
+          <a href="#gallery" class="px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Gallery</a>
+          <a href="#testimonials" class="px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Testimonials</a>
+          <a href="#contact" class="px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Contact</a>
+          <a href="#book" class="ml-2 px-5 py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition shadow-md">Book Now</a>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Mobile Navigation -->
+    <div id="mobile-menu" class="hidden md:hidden glass-effect shadow-md">
+      <div class="container mx-auto px-4 py-3 space-y-2">
+        <a href="#home" class="block px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Home</a>
+        <a href="#services" class="block px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Services</a>
+        <a href="#specialists" class="block px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Our Team</a>
+        <a href="#gallery" class="block px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Gallery</a>
+        <a href="#testimonials" class="block px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Testimonials</a>
+        <a href="#contact" class="block px-4 py-2 rounded-md text-sakura-700 hover:bg-sakura-100 transition">Contact</a>
+        <a href="#book" class="block px-4 py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition text-center">Book Now</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="home" class="relative min-h-screen flex items-center">
+    <!-- P5.js Sakura animation will render here -->
+    <div id="sakura-canvas" class="absolute inset-0 pointer-events-none"></div>
+    
+    <div class="container mx-auto px-6 py-20 relative z-10">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl md:text-6xl font-display font-bold mb-6 leading-tight text-sakura-900">
+          Experience the Artistry of <span class="text-sakura-600">Beauty</span>
+        </h1>
+        <p class="text-lg md:text-xl mb-8 text-gray-700 max-w-2xl text-balance">
+          Where traditional Japanese beauty techniques blend with modern styling to create an experience as delicate and memorable as cherry blossoms.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="#book" class="px-8 py-3 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition shadow-lg font-medium">
+            Book Appointment
+          </a>
+          <a href="#services" class="px-8 py-3 bg-white text-sakura-700 border border-sakura-300 rounded-md hover:bg-sakura-50 transition shadow-md font-medium">
+            Explore Services
+          </a>
+        </div>
+        
+        <!-- Floating highlight cards -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="glass-effect p-6 rounded-xl shadow-md animate-float card-hover">
+            <div class="text-sakura-600 mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-sakura-800">Expert Stylists</h3>
+            <p class="text-gray-600 mt-2">Trained in both traditional and modern techniques</p>
+          </div>
+          
+          <div class="glass-effect p-6 rounded-xl shadow-md animate-float delay-100 card-hover">
+            <div class="text-sakura-600 mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-sakura-800">Premium Products</h3>
+            <p class="text-gray-600 mt-2">Using only the finest Japanese beauty products</p>
+          </div>
+          
+          <div class="glass-effect p-6 rounded-xl shadow-md animate-float delay-200 card-hover">
+            <div class="text-sakura-600 mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-sakura-800">Zen Atmosphere</h3>
+            <p class="text-gray-600 mt-2">Tranquil environment for complete relaxation</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <a href="#services" class="text-sakura-600 hover:text-sakura-800 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-display font-bold text-sakura-800 mb-4">Our Signature Services</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">Immerse yourself in luxurious treatments designed to enhance your natural beauty and provide ultimate relaxation.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Service 1 -->
+        <div class="bg-sakura-50 rounded-xl shadow-lg overflow-hidden transition-all duration-300 group card-hover">
+          <div class="h-48 bg-gradient-to-br from-sakura-300 to-sakura-500 relative flex items-center justify-center">
+            <div class="text-white text-5xl opacity-20 group-hover:opacity-30 transition-opacity">✂️</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <h3 class="font-display text-2xl font-bold text-white shadow-text">Sakura Haircut</h3>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+              <p class="text-gray-600">A refreshing cut tailored to your face shape and style — includes wash & blow-dry.</p>
+              <span class="bg-sakura-100 text-sakura-800 px-3 py-1 rounded-md font-semibold">$45</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                60 minutes
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Includes styling consultation
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Natural product hair wash
+              </div>
+            </div>
+            <button class="mt-6 w-full py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition">Book Now</button>
+          </div>
+        </div>
+        
+        <!-- Service 2 -->
+        <div class="bg-sakura-50 rounded-xl shadow-lg overflow-hidden transition-all duration-300 group card-hover">
+          <div class="h-48 bg-gradient-to-br from-sakura-400 to-sakura-600 relative flex items-center justify-center">
+            <div class="text-white text-5xl opacity-20 group-hover:opacity-30 transition-opacity">💆‍♀️</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <h3 class="font-display text-2xl font-bold text-white shadow-text">Japanese Hair Spa</h3>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+              <p class="text-gray-600">Revitalize your hair with deep conditioning and scalp massage using natural oils.</p>
+              <span class="bg-sakura-100 text-sakura-800 px-3 py-1 rounded-md font-semibold">$65</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                90 minutes
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Premium Japanese oils
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Includes head & shoulder massage
+              </div>
+            </div>
+            <button class="mt-6 w-full py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition">Book Now</button>
+          </div>
+        </div>
+        
+        <!-- Service 3 -->
+        <div class="bg-sakura-50 rounded-xl shadow-lg overflow-hidden transition-all duration-300 group card-hover">
+          <div class="h-48 bg-gradient-to-br from-sakura-500 to-sakura-700 relative flex items-center justify-center">
+            <div class="text-white text-5xl opacity-20 group-hover:opacity-30 transition-opacity">👰</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <h3 class="font-display text-2xl font-bold text-white shadow-text">Bridal Elegance</h3>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+              <p class="text-gray-600">Traditional and modern bridal dressing with flawless hair and makeup service.</p>
+              <span class="bg-sakura-100 text-sakura-800 px-3 py-1 rounded-md font-semibold">From $175</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                3+ hours
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Includes trial session
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Premium beauty products
+              </div>
+            </div>
+            <button class="mt-6 w-full py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition">Book Consultation</button>
+          </div>
+        </div>
+        
+        <!-- Service 4 -->
+        <div class="bg-sakura-50 rounded-xl shadow-lg overflow-hidden transition-all duration-300 group card-hover">
+          <div class="h-48 bg-gradient-to-br from-sakura-300 to-sakura-500 relative flex items-center justify-center">
+            <div class="text-white text-5xl opacity-20 group-hover:opacity-30 transition-opacity">✨</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <h3 class="font-display text-2xl font-bold text-white shadow-text">Facial Glow Ritual</h3>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+              <p class="text-gray-600">Restore your skin's natural glow with our soothing facial treatments.</p>
+              <span class="bg-sakura-100 text-sakura-800 px-3 py-1 rounded-md font-semibold">$60</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                75 minutes
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Includes skin analysis
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Natural botanicals
+              </div>
+            </div>
+            <button class="mt-6 w-full py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition">Book Now</button>
+          </div>
+        </div>
+        
+        <!-- Service 5 -->
+        <div class="bg-sakura-50 rounded-xl shadow-lg overflow-hidden transition-all duration-300 group card-hover">
+          <div class="h-48 bg-gradient-to-br from-sakura-400 to-sakura-600 relative flex items-center justify-center">
+            <div class="text-white text-5xl opacity-20 group-hover:opacity-30 transition-opacity">💅</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <h3 class="font-display text-2xl font-bold text-white shadow-text">Sakura Nail Art</h3>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+              <p class="text-gray-600">Beautiful nail designs inspired by Japanese art and traditional motifs.</p>
+              <span class="bg-sakura-100 text-sakura-800 px-3 py-1 rounded-md font-semibold">From $40</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                60-90 minutes
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                High-quality gel polishes
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-sakura-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Customizable designs
+              </div>
+            </div>
+            <button class="mt-6 w-full py-2 bg-sakura-600 text-white rounded-md hover:bg-sakura-700 transition">Book Now</button>
+          </div>
+        </div>
+        
+        <!-- Service 6 -->
+        <div class="bg-sakura-50 rounded-xl shadow-lg overflow-hidden transition-all duration-300 group card-hover">
+          <div class="h-48 bg-gradient-to-br from-sakura-500 to-sakura-700 relative flex items-center justify-center">
+            <div class="text-white text-5xl opacity-20 group-hover:opacity-30 transition-opacity">🧘‍♀️</div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <h3 class="font-display text-2xl font-bold text-white shadow-text">Complete Relaxation Package</h3>
+            </div>
+          </div
